@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.11.7/video-js.min.css" rel="stylesheet" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.11.7/video.min.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-eme@3.8.0/dist/videojs-contrib-eme.js"></script>
+
+    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
+
+    <script src="//cdn.sc.gl/videojs-hotkeys/latest/videojs.hotkeys.min.js"></script>
+
+    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
+    
+    <!-- <link href="https://unpkg.com/@videojs/themes@1/dist/fantasy/index.css" rel="stylesheet"> -->
+
+
+    <style>
+        
+      
+        .video-js .vjs-play-progress:before {
+            line-height: normal;
+        }
+
+        .vjs-icon-forward-10:before, .video-js .vjs-skip-forward-10 .vjs-icon-placeholder:before{
+            font-size: 0.9rem;
+            translate: 0.5rem;
+        }
+
+        
+      
+
+        
+      .video-js .vjs-slider-bar::before {
+        z-index: 2;
+      }
+  
+      .vjs-marker {
+        position: absolute;
+        background: rgba(43,51,63,.7);
+        width: 0.5em;
+        top: 0;
+        bottom: 0;
+        z-index: 1;
+      }
+
+      
+  
+      .video-js .vjs-progress-control .vjs-mouse-display {
+        z-index: 2;
+      }
+  
+      .vjs-progress-control:hover .vjs-mouse-display .vjs-time-tooltip {
+        width: max-content;
+        left: 50%;
+    
+  
+        display: flex;
+        gap: 0.2em;
+  
+        transform: translateX(-50%);
+      }
+
+
+
+      .video-js .vjs-volume-level::before {
+        top: 0em;
+      }
+
+      h1 {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+
+    p {
+        font-size: 40px;
+        font-weight: 400;
+        margin-bottom: 12px;
+    }
+
+    li{
+        font-size: 30px;
+        font-weight: 400;
+        margin-bottom: 12px;
+    }
+    
+      </style>
+    
+
+    <title>Test VideJS DRM</title>
+</head>
+<body>
+
+    <div style="margin: 50px auto;">
+        <video id="my-video" class="video-js ">
+        <track kind="chapters" src="./sample.vtt" srclang="en" label="English" default>
+    </video>
+    </div>
+
+    <div id="contributions">
+      <h1>Contributions to Video.js Project:</h1>
+    <p>Added hotkeys for improved user control:</p>
+    <ul type="disc">
+        <li>Left and right arrow keys for video seeking.</li>
+        <li>Up and down arrow keys for volume adjustment.</li>
+        <li>'>' and '<' keys for playback speed control.</p>
+        <li>'f' for fullscreen mode.</li>
+        <li>'esc' to exit fullscreen mode.</li>
+        <li>'m' for mute/unmute toggle.</li>
+    </ul>
+    <p>Implemented chapters for easy navigation to specific video sections.</p>
+    <p>Added Ctrl + left/right arrow keys to skip to the next or previous sections.</p>
+    </div>
+  
+
+
+    
+    <script>
+
+      const markers = [
+      { startTime: 0, endTime : 50, label: 'Chapter 1' },
+      {startTime: 50, endTime : 100, label: 'Chapter 2' },
+      { startTime: 100, endTime : 150, label: 'Chapter 3' },
+      { startTime: 150, endTime : 200, label: 'Chapter 4' },
+      { startTime: 200, endTime : 220, label: 'Chapter 5' },
+
+    ];
+        
+        var player = videojs(
+            document.getElementById('my-video'),
+            {
+                controls: true,
+
+                
+                  chapters: [
+                    { "text": "Chapter 1", "startTime": 0, "endTime": 50 },
+                    { "text": "Chapter 2", "startTime": 50, "endTime": 100 },
+                    { "text": "Chapter 3", "startTime": 100, "endTime": 150 },
+                    { "text": "Chapter 4", "startTime": 150, "endTime": 200 },
+                    { "text": "Chapter 5", "startTime": 200, "endTime": 220 }
+                  ],
+                
+
+
+                plugins: {
+
+
+                    hotkeys: {
+                      volumeStep: 0.1,
+                      enableVolumeScroll : false,
+                      enableMute : true,
+                      enableNumbers : true,
+                      alwaysCaptureHotkeys : true,
+                      seekStep: 5,
+                      enableModifiersForNumbers: false,
+                      enableFullscreen: true,
+                      enableNumbers: true,
+                      enableVolumeScroll: false,
+                      enableHoverScroll: true,
+                      captureDocumentHotkeys: true,
+                      enableFull:false,
+                      documentHotkeysFocusElementFilter: e => e.tagName.toLowerCase() === "body",
+
+                      
+            
+                      // Mimic VLC seek behavior, and default to 5.
+                      seekStep: function(e) {
+                        if (e.ctrlKey && e.altKey) {
+                          return 5*60;
+                        } else if (e.ctrlKey) {
+
+                          const currentTime = player.currentTime();
+
+                          for (let i = 0; i < markers.length; i++) {
+
+                            if(e.keyCode == '37'){
+
+                              if(currentTime >= markers[i].startTime && currentTime <= markers[i].startTime + 2 && i != 0){
+                                return currentTime - markers[i - 1].startTime;
+                              }
+                              
+                               
+                              if (markers[i].startTime < currentTime && markers[i].endTime > currentTime) {
+                                
+                                return currentTime - markers[i].startTime;
+
+                               }
+   
+                            }
+                             
+                              if (markers[i].startTime > currentTime) {
+                                return markers[i].startTime - currentTime;
+                              } 
+                          }
+                        } else if (e.altKey) {
+                          return 10;
+                        } else {
+                          return 5;
+                        }
+                      },
+            
+                      // Enhance existing simple hotkey with a complex hotkey
+                      fullscreenKey: function(e) {
+                        // fullscreen with the F key or Ctrl+Enter
+                        return ((e.which === 70) || (e.ctrlKey && e.which === 13));
+                      },
+
+                      customKeys :   {
+
+                      decreasePlaybackSpeedKey: {
+                        key: function (e) {
+                          // Check for Shift + , key
+                          return  e.shiftKey && e.which === 188; // 188 corresponds to the , key
+                        },
+                        handler: function (player, options, event) {
+                          // Decrease playback speed
+                          let playbackRates = player.options().playbackRates;
+                          let currentSpeedIndex = playbackRates.findIndex((speed) => speed === player.playbackRate());
+                          console.log("currentSpeedIndex: ", currentSpeedIndex)
+                          if(currentSpeedIndex === 0) return;
+                          let prevSpeed = playbackRates[currentSpeedIndex-1 ];
+                          return player.playbackRate(prevSpeed);
+
+                        }
+                      },
+
+                      increasePlaybackSpeedKey: {
+                        key: function (e) {
+                          // Check for Shift + . key
+                          return e.shiftKey && e.which === 190; // 190 corresponds to the . key
+                        },
+                        handler: function (player, options, event) {
+                          // Increase playback speed
+                          let playbackRates = player.options().playbackRates;
+                          let currentSpeedIndex = playbackRates.findIndex((speed) => speed === player.playbackRate());
+                          if(currentSpeedIndex === playbackRates.length - 1) return;
+                          let nextSpeed = playbackRates[currentSpeedIndex + 1];
+                          player.playbackRate(nextSpeed);
+                        }
+                      },
+
+                    },
+
+                    
+
+                    }
+                },
+                
+                responsive: true,
+                playbackRates: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+                fluid: true,
+                html5: {
+                    vhs: { 
+                        overrideNative: true 
+                    }
+                },
+                
+                
+            },
+            function() {
+                var player = this;
+                player.eme();
+                player.src({
+                    src: 'https://cdn.bitmovin.com/content/assets/art-of-motion_drm/mpds/11331.mpd',
+                    type: 'application/dash+xml',                    
+                    keySystems: {
+                      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',                     
+                    }
+                });
+
+            
+                player.ready(function() {
+
+                    player.tech(true).on('keystatuschange', function(event) {    
+                        console.log("event: ", event);        
+
+                    });                        
+
+                });                
+            }  
+            
+            
+        
+        );
+
+       
+        
+        
+        /*let controlBar = player.getChild('controlBar');
+
+        let skipBackwardButton = controlBar.addChild('button');
+        skipBackwardButton.addClass('vjs-icon-replay-10');
+        skipBackwardButton.controlText('Skip Backward');
+
+        skipBackwardButton.on('click', function() {
+            let currentTime = player.currentTime();
+            player.currentTime(currentTime - 10); 
+        });
+
+        controlBar.el().insertBefore(skipBackwardButton.el(), controlBar.getChild('fullscreenToggle').el());
+
+        let skipForwardButton = controlBar.addChild('button');
+        skipForwardButton.addClass('vjs-icon-forward-10');
+        skipForwardButton.controlText('Skip Backward');
+
+        skipForwardButton.on('click', function() {
+            let currentTime = player.currentTime();
+            player.currentTime(currentTime - 10); 
+        });
+
+        controlBar.el().insertBefore(skipForwardButton.el(), controlBar.getChild('fullscreenToggle').el());
+        */
+
+      
+      
+    
+        const formatedTimeToSeconds = (time) => {
+            const timeSplit = time.split(':');
+            const seconds = +timeSplit.pop();
+            console.log(seconds);
+            console.log(timeSplit);
+      
+            return timeSplit.reduce((acc, curr, i, arr) => {
+              if (arr.length === 2 && i === 1) return acc + +curr * 60 ** 2;
+              else return acc + +curr * 60;
+            }, seconds);
+          };
+      
+          const timeEl = (time) => {
+            return videojs.dom.createEl('span', undefined, undefined, `(${time})`);
+          };
+      
+          const labelEl = (label) => {
+            return videojs.dom.createEl('strong', undefined, undefined, label);
+          };
+
+         
+      
+          const addMarkers = () => {
+            const total = player.duration();
+            const { seekBar } = player.controlBar.progressControl;
+
+            markers.forEach((marker) => {
+              console.log(marker.startTime);
+              if(marker.startTime != 0 && marker.endTime != total ){
+
+                const markerTime = marker.startTime;
+                const left = (markerTime / total) * 100 + '%';
+        
+                const markerEl = videojs.dom.createEl('div', undefined, {
+                  class: 'vjs-marker',
+                  style: `left: ${left}`,
+                });
+        
+                seekBar.el().append(markerEl);
+              }
+            });
+          };
+      
+        
+      
+          player.on('loadedmetadata', addMarkers);
+      
+          player.getDescendant([
+            'controlBar',
+            'progressControl',
+            'seekBar',
+            'mouseTimeDisplay',
+            'timeTooltip',
+          ]).update = function (seekBarRect, seekBarPoint, time ) {
+            console.log(seekBarRect, seekBarPoint, time);
+            
+            const markerIndex = markers.findIndex(
+              (marker) => marker.startTime <= formatedTimeToSeconds(time) && marker.endTime >= formatedTimeToSeconds(time)
+            );
+
+      
+            if (markerIndex > -1) {
+              const { label } = markers[markerIndex];
+      
+              videojs.dom.emptyEl(this.el());
+              videojs.dom.appendContent(this.el(), [labelEl(label), timeEl(time)]);
+      
+              return;
+            }
+      
+            this.write(time);
+          };
+          
+          
+          /*player.on("volumechange", () => {
+            console.log("volumechange");
+      
+            const volumeBar = player.controlBar.volumePanel;
+            console.log("volumeBar: ", volumeBar);
+            
+            
+            if (volumeBar) {
+              console.log("volumeBar: hihi", volumeBar);
+              volumeBar.addClass('vjs-slider-active' , "vjs-hover");
+          }
+      
+      
+      
+          });*/
+
+
+        
+        
+
+    </script>
+   
+</body>
+</html>
+
+
